@@ -196,5 +196,5 @@ async function init() {
 }
 
 void init().catch(() => {
-  appEl.textContent = 'Could not load phone settings. Please reopen Fantasy Football in Even Hub.'
+  appEl.textContent = 'Could not load phone settings. Please reopen Fantasy Sports in Even Hub.'
 })

@@ -187,7 +187,7 @@ export function renderPhoneMenu(appEl: HTMLElement, state: PhoneState, actions: 
   appEl.innerHTML = `
     <main class="phone-menu">
       <header class="phone-header">
-        <p class="eh-label">Even G2 · Fantasy football</p>
+        <p class="eh-label">Even G2 · Fantasy sports</p>
         <h1 class="eh-title">Your fantasy scores</h1>
         <p class="eh-body eh-dim">Sleeper and Yahoo in one place. Tap your glasses to refresh scores.</p>
       </header>

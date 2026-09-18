@@ -1,4 +1,4 @@
-# Fantasy Football for Even G2
+# Fantasy Sports for Even G2
 
 A small [Even Hub](https://www.evenrealities.com/) app that puts current-week
 [Sleeper](https://sleeper.com/) and [Yahoo Fantasy](https://sports.yahoo.com/fantasy/)
@@ -74,8 +74,8 @@ same Wi-Fi network.
 1. Clone the repo and install dependencies:
 
    ```bash
-   git clone https://github.com/ajmark/even-g2-fantasy-football.git
-   cd fantasy-football
+   git clone https://github.com/ajmark/even-g2-fantasy-sports.git
+   cd even-g2-fantasy-sports
    npm install
    ```
 
@@ -109,14 +109,14 @@ same Wi-Fi network.
    ```bash
    npm install
    npm run build
-   npx evenhub pack app.json dist -o fantasy-football.ehpk
+   npx evenhub pack app.json dist -o fantasy-sports.ehpk
    ```
 
    This validates `app.json`, bundles the `dist/` folder, and writes
-   `fantasy-football.ehpk` in the project root.
+   `fantasy-sports.ehpk` in the project root.
 
 2. Sign in to the Even Hub developer portal (`npx evenhub login` authenticates
-   the CLI with the same account) and upload `fantasy-football.ehpk`. After it
+   the CLI with the same account) and upload `fantasy-sports.ehpk`. After it
    is accepted, the app appears in **Even Hub** inside the Even Realities app
    and can be installed to your glasses like any other Even Hub app.
 
@@ -126,7 +126,7 @@ if you edit it (for example, changing `package_id` or `version`).
 
 ## First-time setup
 
-1. Launch **Fantasy Football** from Even Hub on your phone.
+1. Launch **Fantasy Sports** from Even Hub on your phone.
 2. Under **Accounts & settings → Sleeper**, enter the username shown in your
    Sleeper profile or your numeric user ID and tap **Connect Sleeper**.
 3. Under **Yahoo Fantasy**, enter your Yahoo **API key / Client ID** when you
