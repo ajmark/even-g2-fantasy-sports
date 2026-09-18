@@ -1,47 +1,64 @@
 # Fantasy Football for Even G2
 
-A tiny [Even Hub](https://www.evenrealities.com/) app that puts your current-week
-[Sleeper](https://sleeper.com/) fantasy football matchup on your Even Realities
-G2 smart glasses.
+A small [Even Hub](https://www.evenrealities.com/) app that puts current-week
+[Sleeper](https://sleeper.com/) and [Yahoo Fantasy](https://sports.yahoo.com/fantasy/)
+football scores on your phone and Even Realities G2 smart glasses.
+
+Sleeper is ready to connect with a username. Yahoo support is scaffolded: you
+can save your API key now, and an adapter can request scores with a manually
+provided OAuth access token. Automatic Yahoo sign-in is still unfinished.
 
 ## What it does
 
-Once you connect your Sleeper account, the glasses show a single always-visible
-scoreboard for this week's matchup in your first Sleeper league:
+The phone menu shows separate Sleeper and Yahoo score cards, with account
+settings always available below. The glasses combine both providers in one
+compact scoreboard. For example, when both providers are configured and their
+requests succeed, the display has this shape (illustrative scores):
 
 ```
-My League Name
+Sleeper | Friends League
 Week 3 - WINNING
-
 alex: 87.42 (proj 112.6)
 rival: 71.10 (proj 104.3)
 
-(tap to refresh)
-Updated 09/14/26 13:05:22
+Yahoo | Work League
+Week 3 - LOSING
+Alex: 64.50 (proj 108.2)
+Rival: 75.20 (proj 110.0)
+09/17/26 13:05:22 | Tap to refresh
 ```
 
-- **Live score** for you and your opponent, pulled from the Sleeper API.
-- **Projected total** for each team, computed from Sleeper's weekly player
-  projections and your league's own scoring settings (so PPR / half-PPR /
-  custom scoring is respected).
+- **Current scores** for you and your opponent, with separate provider labels.
+- **Sleeper projections** computed from weekly player projections and your
+  league's scoring settings, including PPR, half-PPR, and custom scoring.
+- **Yahoo scores and projections** parsed from Yahoo's league scoreboard when
+  authorization is configured and those values are available.
 - **WINNING / LOSING / TIED** status at a glance.
-- **Tap the glasses touchpad** to refresh the score.
+- **Tap the glasses touchpad** or **Refresh** on the phone to update scores.
 - Handles bye weeks and the case where the opponent hasn't been scheduled yet.
+- A missing key, disconnected account, or failed request appears in that
+  provider's section; the other provider can still show scores.
 
-The phone side of the app is a one-time setup screen: enter your Sleeper
-username (or user ID), and it's saved on the device so you don't have to
-enter it again. A "Change account" button lets you switch users later.
+Sleeper and Yahoo are optional and independent. You can keep using Sleeper
+while waiting for your Yahoo key, or configure Yahoo without connecting Sleeper.
+With only a Yahoo key saved, its score section reports that OAuth setup is needed.
 
-The app only talks to `https://api.sleeper.app` and requires no Sleeper login
-or password, since Sleeper's public API is read-only and keyed by username.
+Sleeper requests use `https://api.sleeper.app` and require no Sleeper password.
+The Yahoo adapter makes read-only requests to
+`https://fantasysports.yahooapis.com` using an OAuth bearer token. The saved API
+key is a Client ID for future authorization; it is never used as a bearer token.
 
 ## Requirements
 
 - Even Realities **G2** glasses paired to your phone.
 - The **Even Realities app** (version 2.2.5 or newer) on your phone.
-- A Sleeper account that is in at least one NFL league for the current season.
+- For Sleeper scores: an account in at least one NFL league for the current season.
+- For Yahoo adapter testing: a Yahoo API key / Client ID, an authorized OAuth
+  access token, and a team key for your league.
 
-For building from source you'll also need **Node.js 20+** and npm.
+For building from source you'll also need npm and **Node.js 20.19+ or 22.12+**
+(or a newer supported major). Use **Node.js 24+** to run the tests, which load
+TypeScript directly; local validation uses Node.js 24.19.
 
 ## Install on your G2 glasses
 
@@ -110,32 +127,75 @@ if you edit it (for example, changing `package_id` or `version`).
 ## First-time setup
 
 1. Launch **Fantasy Football** from Even Hub on your phone.
-2. The phone screen shows **Connect Sleeper**. Enter your Sleeper username
-   (the one shown in your Sleeper profile) or your numeric user ID and tap
-   **Connect**.
-3. The glasses display switches to your matchup within a few seconds.
+2. Under **Accounts & settings → Sleeper**, enter the username shown in your
+   Sleeper profile or your numeric user ID and tap **Connect Sleeper**.
+3. Under **Yahoo Fantasy**, enter your Yahoo **API key / Client ID** when you
+   receive it, then tap **Save Yahoo settings**. The field is masked.
+4. Your Sleeper matchup appears after refresh. Yahoo shows **API key saved ·
+   Yahoo authorization pending** until authorization is supplied.
 
-Your username is stored locally on the phone. To switch accounts, open the app
-on your phone and tap **Change account**.
+You can complete either provider's setup independently. Settings persist on
+the phone through the Even Hub bridge's `setLocalStorage` / `getLocalStorage`
+API, rather than browser storage. Reopening the app restores saved settings.
+
+### Yahoo authorization scaffold
+
+A Yahoo API key / Client ID alone cannot access your fantasy scores. Yahoo also
+requires OAuth account authorization. The automatic sign-in, authorization
+callback, token exchange, and token renewal flow are not implemented yet.
+
+For optional adapter testing, expand **Advanced developer setup** on the phone:
+
+1. Enter an existing authorized **OAuth access token**. This input is masked.
+2. Enter your numeric **Team key**, using the shape
+   `game.l.league.t.team`, for example `461.l.1000.t.1`. Replace the example
+   numbers with your actual game, league, and team IDs.
+3. Tap **Save Yahoo settings**, then refresh scores.
+
+Leave the token field blank when editing settings to keep the saved token.
+Changing the API key requires a token issued for the new client. Expired tokens
+must be replaced manually; automatic refresh is not implemented. There is no
+client-secret field, and a Yahoo client secret should not be placed in this
+WebView or bundled app.
+
+**Clear Yahoo settings** removes the saved API key, access token, and team key
+without disconnecting Sleeper. Saving or clearing settings is explicit; typing
+in a field does not save it, and score refreshes preserve unfinished form edits.
+
+The adapter has fixture-based coverage, but real Yahoo credentials have not yet
+been used to verify live scores. Yahoo request behavior, including CORS and
+authorization from the Even App WebView, still needs validation on a device.
+A backend may be needed for the eventual OAuth flow or API access.
+
+See the official [Yahoo Fantasy Sports API documentation](https://sports.yahoo.com/developer/docs/)
+and [Yahoo OAuth authenticated API requests guide](https://developer.yahoo.com/oauth2/guide/apirequests/).
 
 ## Using it
 
-| Action | Result |
-|---|---|
-| Tap the touchpad on the glasses | Refresh the score and projections |
-| Open the app on the phone | Shows which account is connected |
-| Tap **Change account** on the phone | Clears the saved user and returns to setup |
+- Tap the glasses touchpad or **Refresh** on the phone to refresh both providers.
+- Open the phone menu to view both score sections and edit account settings.
+- Expand Sleeper's **Change account**, enter another username, and tap
+  **Connect Sleeper** to switch accounts. Use **Disconnect** to remove Sleeper.
+- Use **Save Yahoo settings** to save changes or **Clear Yahoo settings** to
+  remove Yahoo configuration.
 
-The display always uses your **first** Sleeper league for the current season.
-Multi-league support is not implemented yet.
+Sleeper uses your **first** league for the current season. Yahoo uses the league
+and team selected by your team key. Multiple leagues per provider are not
+implemented yet. Long names are shortened to fit the glasses display.
 
 ## Project layout
 
 ```
-app.json        Even Hub manifest (package id, version, network permission)
-index.html      WebView entry point loaded by the Even Realities app
-src/main.ts     Everything: Sleeper API calls, glasses rendering, phone UI
-dist/           Build output (generated by `npm run build`)
+app.json          Even Hub manifest (package id, version, network permission)
+index.html        WebView entry point loaded by the Even Realities app
+src/main.ts       Bridge lifecycle, saved settings, refresh coordination
+src/phone-ui.ts   Persistent phone menu, account forms, provider score cards
+src/providers.ts  Independent score loading for both providers
+src/scores.ts     Shared score model and combined glasses formatting
+src/sleeper.ts    Sleeper account, matchup, and projection requests
+src/yahoo.ts      Yahoo OAuth-token adapter and scoreboard response parser
+tests/            Fixture and behavior tests
+dist/             Build output (generated by `npm run build`)
 ```
 
 Built with the [Even Hub SDK](https://www.npmjs.com/package/@evenrealities/even_hub_sdk),
@@ -144,19 +204,37 @@ the G2's 576x288 canvas.
 
 ## Testing without glasses
 
+Run the tests and production build:
+
+```bash
+npm test
+npm run build
+```
+
+The tests use fixtures and mocked requests, so a Yahoo key is not required.
+Passing these checks does not verify Yahoo authentication or networking on a
+physical phone and glasses.
+
 The Even Hub simulator is included as a dev dependency. Start the Vite dev
 server, then run the simulator and point it at the dev URL to see the glasses
 output and phone UI on your desktop.
 
 ## Troubleshooting
 
-- **"Couldn't find that Sleeper account"**: check the spelling of your
+- **"Could not connect Sleeper"**: check the spelling of your
   username. It is case-insensitive but must match your Sleeper profile name,
   not your display name in a specific league.
 - **"No active Sleeper leagues found"**: your account has no NFL league for the
   current season, or the season hasn't started on Sleeper yet.
-- **"Could not load score. Tap to retry."**: the Sleeper API request failed.
+- **Sleeper scores unavailable**: the Sleeper API request failed.
   Check the phone's internet connection and tap the glasses to retry.
+- **Yahoo authorization pending**: your API key was saved, but OAuth still
+  needs to be supplied. Saving the key alone does not sign you in.
+- **Yahoo token expired/invalid**: replace the token under **Advanced developer
+  setup** and save again.
+- **Invalid Yahoo team key**: use numeric IDs in the shape `461.l.1000.t.1`.
+- **Yahoo connection failed**: check your connection. Direct Yahoo access from
+  the phone WebView has not yet been validated and may require a backend.
 - **App doesn't load from the QR code**: make sure the phone and computer are on
   the same network and that Vite was started with `--host`. Firewalls on the
   computer can also block port 5173.

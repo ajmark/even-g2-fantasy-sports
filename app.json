@@ -9,8 +9,8 @@
   "permissions": [
     {
       "name": "network",
-      "desc": "Fetches your current week's fantasy football matchup score from Sleeper.",
-      "whitelist": ["https://api.sleeper.app"]
+      "desc": "Fetches fantasy football matchup scores from Sleeper and, when authorized, Yahoo Fantasy Sports.",
+      "whitelist": ["https://api.sleeper.app", "https://fantasysports.yahooapis.com"]
     }
   ],
   "supported_languages": [
